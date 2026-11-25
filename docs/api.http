@@ -1,0 +1,74 @@
+@base = http://localhost:8000
+@id = 1
+
+### Actual database health
+GET {{base}}/api/health
+
+### List products (1-based pagination)
+GET {{base}}/api/products?page=1&page_size=10
+
+### Search by product name
+GET {{base}}/api/products?search=lamp&page=1&page_size=10
+
+### Inventory-wide summary
+GET {{base}}/api/products/stats
+
+### Create: copy the returned ID into @id
+POST {{base}}/api/products
+Content-Type: application/json
+
+{
+  "name": "Adjustable desk lamp",
+  "description": "Dimmable warm LED light",
+  "price": "149.90",
+  "quantity": 4,
+  "category": "Workspace",
+  "image_url": "https://example-bucket.s3.amazonaws.com/lamp.jpg"
+}
+
+### Read
+GET {{base}}/api/products/{{id}}
+
+### Update (full editable representation)
+PUT {{base}}/api/products/{{id}}
+Content-Type: application/json
+
+{
+  "name": "Adjustable desk lamp",
+  "description": "Updated description",
+  "price": "159.90",
+  "quantity": 8,
+  "category": "Workspace",
+  "image_url": "https://example-bucket.s3.amazonaws.com/lamp.jpg"
+}
+
+### Invalid price (422)
+POST {{base}}/api/products
+Content-Type: application/json
+
+{"name": "Invalid lamp", "price": "-1.00", "quantity": 1}
+
+### Partial update (only quantity changes)
+PATCH {{base}}/api/products/{{id}}
+Content-Type: application/json
+
+{"quantity": 8}
+
+### Clear the optional image and description
+PATCH {{base}}/api/products/{{id}}
+Content-Type: application/json
+
+{"image_url": null, "description": null}
+
+### Invalid partial update (422, no changes persist)
+PATCH {{base}}/api/products/{{id}}
+Content-Type: application/json
+
+{"quantity": -1, "description": "Must not be saved"}
+
+### Delete (204 with empty body)
+DELETE {{base}}/api/products/{{id}}
+
+### Missing product (404 after deletion)
+GET {{base}}/api/products/{{id}}
+
