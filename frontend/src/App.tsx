@@ -33,6 +33,7 @@ export default function App() {
   const [deleteError, setDeleteError] = useState('');
   const [guide, setGuide] = useState(false);
   const [toast, setToast] = useState('');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Query state changes only after typing pauses; intermediate keystrokes never fetch.
   useEffect(() => {
@@ -79,23 +80,25 @@ export default function App() {
     } finally { setDeleteBusy(false); }
   }
 
-  return <div className="app-shell">
-    <aside className="sidebar">
-      <a className="brand" href="/" aria-label="Stockroom home"><span className="brand-mark"><Box size={23} strokeWidth={1.8} /></span><span>stockroom<span className="brand-period">.</span></span></a>
+  return <div className={'app-shell' + (sidebarCollapsed ? ' sidebar-collapsed' : '')}>
+    <aside className="sidebar" id="primary-sidebar">
+      <div className="sidebar-header">
+        <a className="brand" href="/" aria-label="Stockroom home"><span className="brand-mark"><Box size={23} strokeWidth={1.8} /></span><span>Stockroom<span className="brand-period">.</span></span></a>
+        <button className="sidebar-toggle" type="button" onClick={() => setSidebarCollapsed(value => !value)} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!sidebarCollapsed} aria-controls="primary-sidebar" title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{sidebarCollapsed ? <ChevronRight size={17} aria-hidden="true" /> : <ChevronLeft size={17} aria-hidden="true" />}</button>
+      </div>
       <div className="workspace"><span className="workspace-avatar">S</span><div>Stockroom workspace<small>Inventory management</small></div></div>
+      <button className="sidebar-add" type="button" onClick={() => { setSelected(null); setAdding(true); }} aria-label="Add product" title={sidebarCollapsed ? 'Add product' : undefined}><Plus size={17} aria-hidden="true" /><span>Add product</span></button>
       <div className="nav-label">CATALOG</div>
-      <nav aria-label="Main navigation"><a className="nav-item active" href="/" aria-current="page"><Boxes size={18} /><span>Products</span><small>{stats.data?.products ?? '—'}</small></a></nav>
+      <nav aria-label="Main navigation"><a className="nav-item active" href="/" aria-label="Products" aria-current="page"><Boxes size={18} /><span>Products</span></a></nav>
       <div className="sidebar-bottom">
-        <div className="workspace-note"><span className="note-line" /><strong>Less admin.<br />More clarity.</strong><p>Every product.<br />Every detail. One place.</p></div>
-        <button className="help-link" onClick={() => setGuide(true)}><CircleHelp size={17} /><span>Workspace guide</span></button>
-        <div className="workspace-user"><span className="user-avatar">SW</span><span>Stockroom<small>Single-user workspace</small></span></div>
+        <button className="help-link" onClick={() => setGuide(true)} aria-label="Open workspace guide" title={sidebarCollapsed ? 'Workspace guide' : undefined}><CircleHelp size={17} /><span>Workspace guide</span></button>
       </div>
     </aside>
 
     <div className="main-shell">
       <header className="topbar"><div className="breadcrumb"><span>Workspace</span><span>/</span><strong>Products</strong></div><span className="edition-tag"><Layers3 size={14} />Product management</span></header>
       <main>
-        <div className="page-heading"><div><div className="eyebrow">INVENTORY / CATALOG</div><h1>Products<span className="heading-count">{stats.data?.products ?? '—'}</span></h1><p>Your catalog, in good order.</p></div>
+        <div className="page-heading"><div><div className="eyebrow">INVENTORY / CATALOG</div><h1>Products</h1></div>
           <button className="button primary" onClick={() => { setSelected(null); setAdding(true); }}><Plus size={18} />Add product</button></div>
 
         <section className="stats-grid" aria-label="Inventory overview">

@@ -21,7 +21,7 @@ export function validate(values: FormValues): FormErrors {
   if (!/^(?:0|[0-9]{1,10})(?:\.[0-9]{1,2})?$/.test(values.price) || Number(values.price) > 9999999999.99)
     errors.price = 'Enter a price from 0 to 9,999,999,999.99, with up to 2 decimal places.';
   if (!/^\d+$/.test(values.quantity) || Number(values.quantity) > 2147483647)
-    errors.quantity = 'Enter a whole number from 0 to 2,147,483,647.';
+    errors.quantity = 'Enter units as a whole number from 0 to 2,147,483,647.';
   if (values.category.trim().length > 100) errors.category = 'Use 100 characters or fewer.';
   if (values.description.trim().length > 5000) errors.description = 'Use 5,000 characters or fewer.';
   if (values.image_url.trim() && !validImageUrl(values.image_url.trim()))
