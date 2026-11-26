@@ -1,11 +1,13 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react';
-import { ChevronDown, ImagePlus, Link2, LoaderCircle, Save, Trash2 } from 'lucide-react';
+import { ImagePlus, Link2, LoaderCircle, Save, Trash2 } from 'lucide-react';
 import { ApiError, type Product, type ProductInput, type ProductPatch } from '../api';
 import { changedFields, toInput, validImageUrl, validate, type FormErrors, type FormValues } from '../validation';
 import Dialog from './Dialog';
+import CategoryField from './CategoryField';
+import { useQueryClient } from '@tanstack/react-query';
 import ProductImage from './ProductImage';
 
-const categories = ['Electronics', 'Workspace', 'Home & living', 'Accessories', 'Stationery'];
+
 
 export default function ProductForm({ product, onClose, onSave }: {
   product?: Product; onClose: () => void;
@@ -16,7 +18,9 @@ export default function ProductForm({ product, onClose, onSave }: {
     quantity: product ? String(product.quantity) : '', category: product?.category || '', image_url: product?.image_url || '',
   };
   const [values, setValues] = useState<FormValues>(initial);
-  const [customCategory, setCustomCategory] = useState(!!product?.category && !categories.includes(product.category));
+  const [customCategory, setCustomCategory] = useState(false);
+  const [categoryBusy, setCategoryBusy] = useState(false);
+  const queryClient = useQueryClient();
   const [errors, setErrors] = useState<FormErrors>({});
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -34,17 +38,19 @@ export default function ProductForm({ product, onClose, onSave }: {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (busy || !dirty) return;
+    if (busy || categoryBusy || !dirty) return;
     const nextErrors = validate(values);
+    if (customCategory && !values.category.trim()) nextErrors.category = 'Enter a category name or choose No category.';
     setErrors(nextErrors); setError('');
     if (Object.keys(nextErrors).length) {
-      document.getElementById(Object.keys(nextErrors)[0])?.focus();
+      (document.getElementById(Object.keys(nextErrors)[0]) || document.getElementById(Object.keys(nextErrors)[0] + '-select'))?.focus();
       return;
     }
     setBusy(true);
     try {
       const input = toInput(values);
       await onSave(product ? changedFields(toInput(initial), input) : input);
+      void queryClient.invalidateQueries({ queryKey: ['categories'] });
     } catch (caught) {
       // Keep values untouched on validation, network, or server failures.
       setError(caught instanceof Error ? caught.message : 'Unable to save product.');
@@ -55,7 +61,7 @@ export default function ProductForm({ product, onClose, onSave }: {
         }
         setErrors(next);
         const first = caught.details.find(detail => detail.field in values);
-        if (first) requestAnimationFrame(() => document.getElementById(first.field)?.focus());
+        if (first) requestAnimationFrame(() => (document.getElementById(first.field) || document.getElementById(first.field + '-select'))?.focus());
       }
       setBusy(false);
     }
@@ -63,7 +69,7 @@ export default function ProductForm({ product, onClose, onSave }: {
 
   return <Dialog wide title={product ? 'Edit product' : 'Add a product'}
     subtitle={product ? 'Only changed fields will be updated.' : 'Add the essentials. You can edit everything later.'}
-    busy={busy} onClose={onClose}>
+    busy={busy || categoryBusy} onClose={onClose}>
     <form onSubmit={submit} noValidate>
       <fieldset disabled={busy} className="form-body form-fields">
         {error && <div role="alert" className="error-banner">{error}</div>}
@@ -78,17 +84,12 @@ export default function ProductForm({ product, onClose, onSave }: {
           <div className="field"><label htmlFor="quantity">Quantity <span>*</span></label>
             <input {...field('quantity')} inputMode="numeric" required placeholder="0" />{fieldError('quantity')}</div>
         </div>
-        <div className="field"><label htmlFor="category-select">Category <small>Optional</small></label>
-          <div className="select-wrap"><select id="category-select" value={customCategory ? '__custom__' : values.category}
-            onChange={event => {
-              const custom = event.target.value === '__custom__'; setCustomCategory(custom);
-              setValues(previous => ({ ...previous, category: custom ? '' : event.target.value }));
-            }}>
-            <option value="">Uncategorized</option>{categories.map(value => <option key={value}>{value}</option>)}
-            <option value="__custom__">Custom category…</option>
-          </select><ChevronDown size={16} /></div>
-          {customCategory && <><label htmlFor="category" className="sr-only">Custom category</label><input {...field('category')} maxLength={100} placeholder="Enter a category" /></>}
-          {fieldError('category')}</div>
+        <CategoryField value={values.category} custom={customCategory} error={errors.category}
+          disabled={busy} onCustomChange={setCustomCategory} onPendingChange={setCategoryBusy}
+          onChange={category => {
+            setValues(previous => ({ ...previous, category }));
+            setErrors(previous => ({ ...previous, category: undefined }));
+          }} />
         <div className="form-section-label image-section-label"><span><ImagePlus size={15} />PRODUCT IMAGE</span><small>Optional</small></div>
         <div className="image-editor">
           <ProductImage url={validImageUrl(values.image_url.trim()) ? values.image_url.trim() : null} name={values.name || 'Product preview'} />
@@ -100,8 +101,8 @@ export default function ProductForm({ product, onClose, onSave }: {
         </div>
       </fieldset>
       <div className="dialog-footer"><span className="save-note">{product ? dirty ? 'Unsaved changes' : 'No changes yet' : 'Ready when you are'}</span>
-        <button type="button" className="button secondary" onClick={onClose} disabled={busy}>Cancel</button>
-        <button type="submit" className="button primary" disabled={busy || !dirty}>{busy ? <LoaderCircle className="spin" size={17} /> : <Save size={17} />}
+        <button type="button" className="button secondary" onClick={onClose} disabled={busy || categoryBusy}>Cancel</button>
+        <button type="submit" className="button primary" disabled={busy || categoryBusy || !dirty}>{busy ? <LoaderCircle className="spin" size={17} /> : <Save size={17} />}
           {busy ? 'Saving…' : product ? 'Save changes' : 'Create product'}</button></div>
     </form>
   </Dialog>;

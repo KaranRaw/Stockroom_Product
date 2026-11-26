@@ -77,7 +77,7 @@ def test_patch_dto_preserves_unset_vs_null():
 
 
 def test_migration_and_search_indexes_exist(db_session):
-    assert db_session.scalar(text("SELECT version_num FROM alembic_version")) == "0002"
+    assert db_session.scalar(text("SELECT version_num FROM alembic_version")) == "0003"
     indexes = db_session.execute(text(
         "SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = 'public' AND tablename = 'products'"
     )).all()

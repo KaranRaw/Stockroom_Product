@@ -9,7 +9,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:ui": "playwright test",
-    "test:live": "playwright test --config playwright.live.config.ts"
+    "test:live": "playwright test --config playwright.live.config.ts",
+    "demo": "playwright test --config playwright.demo.config.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "5.80.2",

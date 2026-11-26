@@ -2,9 +2,9 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   Inventory UI — "Claude / Anthropic" theme
+   Stockroom interface
    Warm ivory paper, ink text, clay accent, serif headings, flat & quiet.
-   Same class names as before: drop-in replacement for style.css
+   Shared tokens and responsive component styles.
    ========================================================================== */
 
 :root {
@@ -47,10 +47,12 @@
   --shadow-sm: 0 1px 0 rgba(20, 20, 19, .03);
   --shadow-md: 0 8px 24px -10px rgba(20, 20, 19, .18);
   --shadow-lg: 0 28px 70px -24px rgba(20, 20, 19, .4);
-}
+  --color-on-success: #fff;
+  --color-on-danger: #fff;
+  --shadow-primary-hover: 0 6px 14px -6px rgba(23, 23, 23, .45);
+  --shadow-secondary-hover: 0 4px 10px -6px rgba(23, 23, 23, .25);
+  --shadow-metric-hover: 0 8px 20px -12px rgba(23, 23, 23, .22);
 
-/* ---------- Base ---------- */
-:root {
   font-family: var(--font-body);
   font-size: 16px;
   font-synthesis: none;
@@ -67,6 +69,9 @@
   --color-border: var(--line);
   --color-canvas: var(--bg);
 }
+
+/* ---------- Base ---------- */
+
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); }
 button, input, textarea, select { font: inherit; color: inherit; }
@@ -220,7 +225,7 @@ h1 { display: flex; align-items: center; gap: 12px; font-size: 34px; letter-spac
 .primary:hover:not(:disabled) { background: var(--primary-hover); }
 .secondary { background: var(--surface); color: var(--text); border-color: var(--line-strong); }
 .secondary:hover:not(:disabled) { background: var(--surface-2); border-color: var(--text-3); }
-.danger { background: var(--bad); color: #fff; }
+.danger { background: var(--bad); color: var(--color-on-danger); }
 .danger:hover:not(:disabled) { filter: brightness(.92); }
 
 /* ---------- Stats ---------- */
@@ -413,7 +418,7 @@ tbody tr:hover { background: var(--row-hover); }
   color: var(--toast-ink); background: var(--toast-bg); border-radius: var(--radius); box-shadow: var(--shadow-lg);
   animation: toast-in .3s var(--ease);
 }
-.toast-check { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ok); color: #fff; }
+.toast-check { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ok); color: var(--color-on-success); }
 .toast button { display: flex; border: 0; background: none; color: inherit; opacity: .6; padding: 3px; margin-left: 10px; border-radius: 6px; }
 .toast button:hover { opacity: 1; }
 
@@ -451,7 +456,9 @@ tbody tr:hover { background: var(--row-hover); }
   .sidebar, .main-shell { transition: none; }
   .sidebar-toggle { display: none; }
   .brand { justify-content: center; padding: 0; }
-  .brand > span:last-child, .workspace, .nav-label, .workspace-note, .help-link, .workspace-user { display: none; }
+  .brand > span:last-child, .workspace, .nav-label, .workspace-note, .workspace-user { display: none; }
+  .help-link { justify-content: center; padding-inline: 0; }
+  .help-link > span { display: none; }
   .nav-item { justify-content: center; padding: 12px; margin-top: 0; }
   .nav-item span, .nav-item small { display: none; }
   .sidebar-add { padding-inline: 0; margin: 22px 0 12px; }
@@ -527,7 +534,7 @@ tbody tr:hover { background: var(--row-hover); }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-/* ---------- Claude-specific touches ---------- */
+/* ---------- Display and component refinements ---------- */
 h1 { font-size: 40px; font-weight: 400; letter-spacing: -.025em; }
 .stat-value { font-weight: 400; font-size: 36px; }
 .eyebrow { color: var(--accent-strong); font-weight: 600; }
@@ -556,17 +563,17 @@ main { animation: page-in .4s var(--ease) both; min-width: 0; }
 
 /* Buttons */
 .primary { transition: background .15s, transform .15s var(--ease), box-shadow .15s; }
-.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 14px -6px rgba(23, 23, 23, .45); }
+.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-primary-hover); }
 .primary:active:not(:disabled) { transform: translateY(0) scale(.985); box-shadow: none; }
-.secondary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 10px -6px rgba(23, 23, 23, .25); }
+.secondary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-secondary-hover); }
 .secondary:active:not(:disabled) { transform: translateY(0) scale(.985); box-shadow: none; }
 .danger:hover:not(:disabled) { transform: translateY(-1px); }
 .danger:active:not(:disabled) { transform: translateY(0) scale(.985); }
-.sidebar-add:hover { box-shadow: 0 6px 14px -6px rgba(23, 23, 23, .45); }
+.sidebar-add:hover { box-shadow: var(--shadow-primary-hover); }
 
 /* Stat cards: small lift, icon tile brightens */
 .stat-card { box-shadow: none; transition: transform .2s var(--ease), box-shadow .2s, border-color .2s; }
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px -12px rgba(23, 23, 23, .22); border-color: var(--line-strong); }
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-metric-hover); border-color: var(--line-strong); }
 .stat-top svg { transition: filter .2s, transform .2s var(--ease); }
 .stat-card:hover .stat-top svg { filter: saturate(1.25) brightness(1.04); transform: scale(1.06); }
 
@@ -614,7 +621,7 @@ button:focus-visible, a:focus-visible, .page-button:focus-visible, .icon-button:
 /* Dialog: fade + slight scale (open) */
 @keyframes dialog-in { from { opacity: 0; transform: translateY(10px) scale(.98); } }
 
-/* Toast: slide in (fade-out on dismiss needs a JS class, see notes) */
+/* Toast entry animation */
 .toast { animation: toast-in .3s var(--ease); }
 
 /* Empty / error states */
@@ -643,3 +650,52 @@ html, body { max-width: 100%; overflow-x: clip; }
   .stat-card:hover, .stat-card:hover .stat-top svg, .state-panel:hover .state-icon,
   .refresh-button:hover:not(:disabled) svg { transform: none !important; }
 }
+
+/* Keep transient feedback centered in the visible content area. */
+@media (min-width: 641px) {
+  .app-shell.sidebar-collapsed .toast { left: calc(50% + 38px); }
+}
+/* Keep the wordmark and toggle within the available sidebar width. */
+.sidebar-header { gap: 6px; }
+.sidebar-header .brand { min-width: 0; gap: 8px; padding: 0; font-size: 22px; }
+.sidebar-header .brand-mark { flex-shrink: 0; width: 32px; height: 32px; }
+.sidebar-header .brand > span:last-child { white-space: nowrap; }
+@media (min-width: 1001px) and (max-width: 1250px) {
+  .sidebar-header .brand { font-size: 20px; }
+}
+
+/* Shared category controls keep long names and errors inside the dialog. */
+.category-field { min-width: 0; }
+.category-field select { min-width: 0; max-width: 100%; text-overflow: ellipsis; }
+.category-create { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding-top: 3px; }
+.category-create-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+.category-create-row input { min-width: 0; }
+.category-save { min-height: 44px; font-size: 12px; padding-inline: 11px; }
+.category-status { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; }
+.category-load-error { color: var(--bad); }
+.category-retry { display: inline-flex; gap: 5px; align-items: center; border: 0; padding: 0; background: none; color: var(--accent-strong); text-decoration: underline; }
+.category-field .field-error { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .category-save { font-size: 11px; padding-inline: 9px; gap: 4px; }
+}
+
+/* Searchable category choices stay in the modal flow, with a bounded result list. */
+.category-picker { display: grid; gap: 8px; min-width: 0; }
+.category-picker-control { position: relative; min-width: 0; }
+.category-picker-control input { padding-left: 36px; padding-right: 66px; text-overflow: ellipsis; }
+.category-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+.category-picker-toggle, .category-search-clear { position: absolute; top: 4px; bottom: 4px; width: 30px; display: grid; place-items: center; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-3); padding: 0; }
+.category-picker-toggle { right: 5px; }
+.category-search-clear { right: 35px; }
+.category-picker-toggle:hover, .category-search-clear:hover { background: var(--surface-3); color: var(--text); }
+.category-picker-panel { min-width: 0; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface); padding: 5px; }
+.category-results { position: relative; max-height: 176px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.category-choice { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; min-height: 40px; border: 0; border-radius: var(--radius-sm); padding: 8px 10px; background: transparent; color: var(--text); text-align: left; font-size: 13px; line-height: 1.5; }
+.category-choice > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.category-choice > svg { flex-shrink: 0; color: var(--accent-strong); }
+.category-choice.active, .category-choice:hover { background: var(--surface-3); }
+.category-choice[aria-selected="true"] { background: var(--accent-soft); }
+.category-picker-actions { border-top: 1px solid var(--line); padding-top: 4px; margin-top: 4px; }
+.category-picker-actions .category-choice:last-child { color: var(--accent-strong); font-weight: 600; }
+.category-empty { padding: 14px 10px; font-size: 13px; color: var(--text-3); overflow-wrap: anywhere; }
+.category-results-count { display: block; border-top: 1px solid var(--line-soft); padding: 7px 10px 2px; color: var(--text-3); font-size: 11.5px; }

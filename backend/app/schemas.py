@@ -23,6 +23,11 @@ class ProductFields(BaseModel):
     def trim_optional(cls, value):
         return (value.strip() or None) if isinstance(value, str) else value
 
+    @field_validator("category", mode="before")
+    @classmethod
+    def normalize_category(cls, value):
+        return " ".join(value.split()) or None if isinstance(value, str) else value
+
     @field_validator("image_url")
     @classmethod
     def validate_image_url(cls, value):
@@ -130,3 +135,24 @@ class ErrorBody(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: ErrorBody
+
+
+class CategoryWrite(BaseModel):
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def normalize_name(cls, value):
+        return " ".join(value.split()) if isinstance(value, str) else value
+
+
+class CategoryRead(BaseModel):
+    id: int
+    name: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("created_at")
+    def serialize_created_at(self, value: datetime) -> str:
+        return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")

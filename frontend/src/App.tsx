@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDownWideNarrow, Box, Boxes, Check, ChevronDown, ChevronLeft, ChevronRight, CircleHelp, Eye, Layers3, LoaderCircle, Package, Pencil, Plus, RefreshCw, Search, Trash2, TriangleAlert, Wallet, X } from 'lucide-react';
-import { api, type Product, type ProductInput, type ProductPatch } from './api';
+import { api, type Product, type ProductInput, type ProductPatch, type ProductPage, type Stats } from './api';
 import Dialog from './components/Dialog';
+import { removeFromPage, removeFromStats } from './cache';
+import { formatMoney as money } from './format';
 import ProductForm from './components/ProductForm';
 import ProductImage from './components/ProductImage';
 
-const money = (amount: string | number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(amount));
+
 const date = (value: string) => new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
 const stock = (quantity: number) => quantity === 0 ? 'Out of stock' : quantity <= 5 ? 'Low stock' : 'In stock';
 type Selected = { id: number; mode: 'view' | 'edit' } | null;
@@ -45,9 +47,9 @@ export default function App() {
     const timeout = setTimeout(() => setToast(''), 4500);
     return () => clearTimeout(timeout);
   }, [toast]);
-  const products = useQuery({ queryKey: ['products', search, page, pageSize], queryFn: () => api.list(search, page, pageSize) });
-  const stats = useQuery({ queryKey: ['stats'], queryFn: api.stats });
-  const detail = useQuery({ queryKey: ['product', selected?.id], queryFn: () => api.get(selected!.id), enabled: !!selected, staleTime: 0, gcTime: 0 });
+  const products = useQuery({ queryKey: ['products', search, page, pageSize], queryFn: ({ signal }) => api.list(search, page, pageSize, signal) });
+  const stats = useQuery({ queryKey: ['stats'], queryFn: ({ signal }) => api.stats(signal) });
+  const detail = useQuery({ queryKey: ['product', selected?.id], queryFn: ({ signal }) => api.get(selected!.id, signal), enabled: !!selected, staleTime: 0, gcTime: 0 });
   const total = products.data?.total || 0;
   const pages = Math.max(1, Math.ceil(total / pageSize));
   useEffect(() => { if (products.data && page > pages) setPage(pages); }, [products.data, pages, page]);
@@ -72,9 +74,26 @@ export default function App() {
     if (!deleting || deleteBusy) return;
     setDeleteBusy(true); setDeleteError('');
     try {
-      await api.remove(deleting.id);
+      const removed = deleting;
+      // Stop pre-delete reads before issuing the mutation; no stale response can overwrite it.
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: ['products'] }),
+        queryClient.cancelQueries({ queryKey: ['stats'] }),
+      ]);
+      const listsBeforeDelete = new Map(
+        queryClient.getQueriesData<ProductPage>({ queryKey: ['products'] })
+          .map(([key, data]) => [JSON.stringify(key), data] as const),
+      );
+      const statsBeforeDelete = queryClient.getQueryData<Stats>(['stats']);
+      await api.remove(removed.id);
+      for (const [key, cached] of queryClient.getQueriesData<ProductPage>({ queryKey: ['products'] })) {
+        if (cached) queryClient.setQueryData(key, removeFromPage(cached, removed, String(key[1] || ''),
+          cached === listsBeforeDelete.get(JSON.stringify(key))));
+      }
+      queryClient.setQueryData<Stats>(['stats'], cached =>
+        cached && cached === statsBeforeDelete ? removeFromStats(cached, removed) : cached);
       queryClient.removeQueries({ queryKey: ['product', deleting.id] });
-      setDeleting(null); setToast('Product deleted.'); refresh();
+      setDeleting(null); setToast('Product removed from the catalog.'); refresh();
     } catch (caught) {
       setDeleteError(caught instanceof Error ? caught.message : 'Unable to delete product.');
     } finally { setDeleteBusy(false); }
@@ -156,10 +175,10 @@ export default function App() {
           <div className="description"><span>Description</span><p>{detail.data.description || 'No description added.'}</p></div></div>
         <div className="dialog-footer"><button className="button secondary" onClick={() => setSelected(null)}>Close</button><button className="button primary" onClick={() => setSelected({ ...selected, mode: 'edit' })}><Pencil size={16} />Edit product</button></div>
       </Dialog>)}
-    {deleting && <Dialog title="Delete this product?" subtitle="This permanently removes it from your catalog." busy={deleteBusy} onClose={() => setDeleting(null)}>
-      <div className="form-body"><div className="delete-summary"><ProductImage url={deleting.image_url} name={deleting.name} /><p><strong>{deleting.name}</strong><span>PRD-{String(deleting.id).padStart(4, '0')} · {deleting.quantity} units</span></p></div><p className="delete-warning">This action cannot be undone.</p>{deleteError && <p role="alert" className="error-banner">{deleteError}</p>}</div>
+    {deleting && <Dialog title="Delete this product?" subtitle="This hides the product from your catalog. Its record is retained." busy={deleteBusy} onClose={() => setDeleting(null)}>
+      <div className="form-body"><div className="delete-summary"><ProductImage url={deleting.image_url} name={deleting.name} /><p><strong>{deleting.name}</strong><span>PRD-{String(deleting.id).padStart(4, '0')} · {deleting.quantity} units</span></p></div><p className="delete-warning">Deleted products are excluded from search and inventory totals.</p>{deleteError && <p role="alert" className="error-banner">{deleteError}</p>}</div>
       <div className="dialog-footer"><button className="button secondary" onClick={() => setDeleting(null)} disabled={deleteBusy}>Keep product</button><button className="button danger" onClick={() => void remove()} disabled={deleteBusy}>{deleteBusy ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={16} />}{deleteBusy ? 'Deleting…' : 'Delete product'}</button></div>
     </Dialog>}
-    {guide && <Dialog title="A place for every product." subtitle="Stockroom · Workspace guide" onClose={() => setGuide(false)}><div className="form-body guide"><p>Add, search, and update products from one catalog. All prices are in Indian rupees (INR).</p><p>Images use public HTTPS links. Upload files to your S3 bucket or image host, then paste the readable image URL. Expired or inaccessible links show a fallback.</p><p>Low stock means 5 units or fewer. Inventory value is unit price multiplied by quantity, across the whole catalog.</p><p>This single-user assignment has no login. Run it locally or restrict access to trusted users.</p></div><div className="dialog-footer"><button className="button primary" onClick={() => setGuide(false)}>Got it</button></div></Dialog>}
+    {guide && <Dialog title="A place for every product." subtitle="Stockroom · Workspace guide" onClose={() => setGuide(false)}><div className="form-body guide"><p>Add, search, and update products from one catalog. All prices are in Indian rupees (INR).</p><p>Images use public HTTPS links. Upload files to your S3 bucket or image host, then paste the readable image URL. Expired or inaccessible links show a fallback.</p><p>Low stock means 5 units or fewer. Inventory value is unit price multiplied by quantity, across the whole catalog.</p></div><div className="dialog-footer"><button className="button primary" onClick={() => setGuide(false)}>Got it</button></div></Dialog>}
   </div>;
 }

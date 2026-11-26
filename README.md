@@ -1,20 +1,27 @@
 # Stockroom · Product Management System
 
-A focused full-stack inventory application built for the RedWolf InfoTech candidate assignment.
+A full-stack product inventory application for managing products, stock quantities, prices, and categories.
 
 **FastAPI · React + TypeScript · PostgreSQL · SQLAlchemy · Alembic**
 
-For the shortest laptop setup, start with [START-HERE.md](START-HERE.md).
+For installation and startup commands, see [START-HERE.md](START-HERE.md).
 
 Manage products through a responsive catalog: add, view, edit, confirm deletion, search by name, and paginate results. The overview shows product count, total units, inventory value, and low-stock products.
 
+## Video walkthrough
+
+[Watch the product management walkthrough](docs/demos/stockroom_ui_walkthrough.webm).
+
+The video demonstrates the frontend using deterministic API fixtures. See [recording instructions](docs/demos/README.md) to regenerate it or record the real FastAPI/PostgreSQL lifecycle.
+
 ## Automated checks
 
-GitHub Actions runs backend linting, migrations, PostgreSQL integration tests, frontend unit tests, a production build, and Playwright UI tests on pushes and pull requests. See [testing and verification](docs/VERIFICATION.md) for commands and coverage.
+GitHub Actions runs backend linting, migrations, PostgreSQL integration tests, frontend unit tests, a production build, fixture-based UI tests, and a real PostgreSQL/FastAPI/browser lifecycle on pushes and pull requests. See [testing and verification](docs/VERIFICATION.md) for commands and coverage.
 
 ## Features
 
-- Product list, details, creation, full replacement (PUT), partial edits (PATCH), and confirmed deletion.
+- Product list, details, creation, full replacement (PUT), partial edits (PATCH), and confirmed soft deletion.
+- Shared persistent categories with searchable Add/Edit dropdowns, inline creation, keyboard selection, and reuse after refresh. Category count is unlimited; each name is limited to 100 characters.
 - Optional HTTPS image URLs with previews, removal, loading states, and broken-image fallbacks.
 - Case-insensitive, literal substring search by product name; 300 ms debounce.
 - Server-side pagination, newest first with a stable ID tie-breaker.
@@ -76,7 +83,7 @@ python -m app.seed
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Seeding is optional. It adds 12 demo products only when the product table is empty. Nothing is seeded automatically during application startup.
+Seeding is optional. It adds 30 demo products, each with an HTTPS image URL, only when the entire product table is empty (including soft-deleted records). Repeating the command skips existing data without overwriting products or reviving deleted rows. Categories and products are inserted in one transaction, and concurrent seed commands are serialized. Nothing is seeded automatically during application startup. See [seed data](docs/SEED-DATA.md).
 
 Check `http://localhost:8000/api/health`; a successful response verifies an actual database connection. Open `http://localhost:8000/docs` to exercise the API.
 
@@ -181,14 +188,16 @@ The GitHub Actions workflow runs Python checks, PostgreSQL integration tests, mi
 
 ## API contract
 
-Base path: `/api`. No authentication is required in this assignment edition.
+Base path: `/api`. This version provides single-user product management without built-in authentication.
 
+- `GET /categories` → **200**, persistent shared category choices.
+- `POST /categories` → **201** for a new name or **200** when an existing category is reused.
 - `GET /products?search=lamp&page=1&page_size=10` → **200**, paginated products.
 - `GET /products/{id}` → **200**, one product; **404** if missing.
 - `POST /products` → **201**, created product plus `Location` header.
 - `PUT /products/{id}` → **200**, updated product; **404** if missing.
 - `PATCH /products/{id}` → **200**, partial update; omitted fields stay unchanged.
-- `DELETE /products/{id}` → **204**, no response body; **404** if missing.
+- `DELETE /products/{id}` → **204**, marks the row deleted without removing it; **404** if missing or already deleted.
 - `GET /products/stats` → **200**, whole-inventory aggregates.
 - `GET /health` → **200** only after a database query succeeds.
 
@@ -238,29 +247,67 @@ Errors share this structure:
 
 Invalid input → **422**; unknown product → **404**; unavailable/failed database operation → **503**; unexpected exception → **500**. Internal exception details are logged, not returned to clients.
 
-`PUT` replaces editable fields. Name, price, and quantity are required; omitted optional description/category values become null. IDs and creation dates are read-only; extra fields are rejected. PATCH accepts only changed fields; explicit null clears optional fields. Empty PATCH objects are rejected. See [image, PATCH and search notes](docs/IMAGE-AND-PATCH.md).
+`PUT` replaces editable fields. Name, price, and quantity are required; omitted optional description/category values become null. IDs, creation dates, and the internal deletion flag cannot be set through product requests; extra fields are rejected. PATCH accepts only changed fields; explicit null clears optional fields. Empty PATCH objects are rejected. See [image, PATCH and search notes](docs/IMAGE-AND-PATCH.md).
 
 See [request examples](docs/api.http) for executable HTTP examples.
 
+## Soft deletion and clean database initialization
+
+Products have an internal `is_deleted BOOLEAN NOT NULL DEFAULT FALSE` flag. DELETE atomically changes it to true; it never removes the product row. Deleted products return 404 for reads and updates and are excluded from search, page totals, stock counts, inventory value, and low-stock counts. After server confirmation, the UI immediately removes the row and updates cached totals while fresh data loads in the background. Repeated DELETE returns 404. There is no hard-delete or restore endpoint.
+
+The existing `0001` migration now creates the flag and active-only indexes from the start. `0002` adds the image URL, and `0003` adds the shared category registry and backfills product category associations. A clean database applies all three revisions with:
+
+```bash
+alembic upgrade head
+alembic check
+```
+
+Use an empty database/schema with no previous Alembic revision state for this clean initialization. Changing an already-applied migration file does not cause Alembic to replay it. The reference SQL schema is also a transactional, first-time schema definition; use either that reference or Alembic, not both on the same schema.
+
 ## Database and architecture
 
-- [Initial Alembic migration](backend/migrations/versions/0001_create_products.py) and [image migration](backend/migrations/versions/0002_product_image_url.py) are the authoritative schema history.
+- The [initial migration](backend/migrations/versions/0001_create_products.py), [image migration](backend/migrations/versions/0002_product_image_url.py), and [shared-category migration](backend/migrations/versions/0003_shared_categories.py) are the authoritative schema history.
 - [SQL script](database/schema.sql) is a readable equivalent; do not apply it in addition to Alembic.
 - [Architecture and decisions](docs/ARCHITECTURE.md) explains layers, indexes, transactions, and assumptions.
 - No automatic `create_all`: schema changes are versioned and reviewed.
-- No extra category table: categories have no independent behavior in the assignment.
+- Categories are persistent records linked through category_id; the product API retains its category-name contract. See [shared categories](docs/CATEGORIES.md).
 - No repository abstraction over SQLAlchemy: the small service layer keeps queries visible.
 
 ## Screenshots
 
 Screenshots are generated by browser tests using deterministic API fixtures and local product illustrations, not a live PostgreSQL connection.
 
+### Product catalog
+
 ![Product catalog](docs/screenshots/products-desktop.png)
+
+### Add a product with an image
+
 ![Product form](docs/screenshots/product-form.png)
+
+### View product details
+
 ![Product details](docs/screenshots/product-details.png)
-![Delete confirmation](docs/screenshots/delete-confirmation.png)
-![Mobile product catalog](docs/screenshots/products-mobile.png)
+
+### Edit and recover from validation errors
+
 ![Retained edit values after a validation failure](docs/screenshots/edit-validation-error.png)
+
+### Confirm deletion
+
+![Delete confirmation](docs/screenshots/delete-confirmation.png)
+
+### Search products by name
+
+![Product search](docs/screenshots/products-search.png)
+
+### Search and create shared categories
+
+![Searchable category choices](docs/screenshots/category-search-1440.png)
+
+### Mobile catalog
+
+![Mobile product catalog](docs/screenshots/products-mobile.png)
 
 ## Assumptions and limitations
 
@@ -271,21 +318,15 @@ Screenshots are generated by browser tests using deterministic API fixtures and 
 - Description (5,000 characters), category (100 characters), and HTTPS image URL (2,048 characters) are optional; blank values become null. Images must be browser-readable; this project does not upload files or fetch image URLs on the backend.
 - Low stock means quantity ≤ 5 and includes out-of-stock products.
 - Concurrent edits use last-write-wins; there is no stock reservation or order workflow.
-- Offset pagination suits this small assignment. Short searches and exact counts may scan more rows; there are no benchmark claims.
+- Offset pagination supports a straightforward paginated catalog. Short searches and exact counts may scan more rows; there are no benchmark claims.
 - PostgreSQL integration tests require a dedicated test database. Standard browser UI tests use mocked API responses; the separate live end-to-end test requires a running backend and development database.
 
-## Submission
+## Deployment
 
-Source code, database migrations and schema, API examples, documentation, and screenshots are included in this repository. To publish the project from its root folder:
+Set backend environment variables for the target PostgreSQL database and allowed frontend origins. Apply migrations with `alembic upgrade head` before starting the API. Build the frontend with `npm ci` and `npm run build`; the optional Docker configuration serves the frontend through Nginx and forwards `/api` to FastAPI.
 
-```bash
-git init
-git add .
-git status
-git commit -m "Implement full-stack product management system"
-git branch -M main
-git remote add origin git@github.com:KaranRaw/Stockroom_Product.git
-git push -u origin main
-```
+The application has no built-in authentication. Restrict network access or place an authenticated gateway in front of it when deploying to a shared environment. Keep database credentials in environment variables or an untracked `.env` file.
 
-Review the staged files before committing and confirm that `backend/.env` is excluded. Make the repository public or grant the hiring team access. GitHub Actions runs automatically on pushes and pull requests. The optional live end-to-end test uses a running backend and a development database.
+## Development workflow
+
+Run the checks in [testing and verification](docs/VERIFICATION.md) before pushing changes. GitHub Actions runs the same backend and frontend checks on pushes and pull requests. UI tests use explicit `main` or sidebar scopes when both areas provide the same action.

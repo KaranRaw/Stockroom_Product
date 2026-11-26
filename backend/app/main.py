@@ -9,6 +9,7 @@ from starlette.exceptions import HTTPException
 from app.config import get_settings
 from app.database import SessionLocal
 from app.routes import router
+from app.category_routes import router as category_router
 from app.schemas import ErrorResponse
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ app = FastAPI(title="Stockroom Product API", version="1.1.0",
 app.add_middleware(CORSMiddleware, allow_origins=get_settings().cors_origins,
                    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"], allow_headers=["Content-Type"])
 app.include_router(router)
+app.include_router(category_router)
 
 
 def error(status: int, code: str, message: str, details=None):

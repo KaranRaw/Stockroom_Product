@@ -1,6 +1,6 @@
 # Quick Start
 
-This folder contains the full Stockroom assignment source.
+Install and run the Stockroom API and frontend.
 
 ## 1. Backend
 
@@ -18,6 +18,8 @@ Open `backend/.env` and set your Neon/Supabase **PostgreSQL connection string**:
 ```dotenv
 DATABASE_URL=postgresql+psycopg://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
 ```
+
+For a clean initialization, use an empty database/schema with no existing Alembic revision state. The initial migration includes `is_deleted BOOLEAN NOT NULL DEFAULT FALSE` and active-only search/order indexes. Revision 0003 adds shared categories, so apply migrations through head.
 
 Then, still in `backend`:
 
@@ -55,10 +57,12 @@ See [README](README.md) for macOS/Linux commands, hosted-provider notes, Docker,
 
 ## Scope and assumptions
 
-- The application has no authentication; the assignment describes a single-user CRUD system.
+- The application provides single-user product management without built-in authentication.
 - Browser UI tests use mocked API fixtures. Run the optional live end-to-end test to exercise the UI with a running backend and development database.
 - Pushes and pull requests trigger the GitHub Actions workflow.
 
 Product images are optional HTTPS links (including public/presigned S3 URLs). Edits use PATCH; PUT remains available in the API. See [image and API notes](docs/IMAGE-AND-PATCH.md).
 
 The ZIP excludes installed dependencies, environments, database data, logs, reports, and credentials.
+
+In Add or Edit, type in Category to search shared names, choose an existing result, or choose Custom category to create one. Save category persists it independently; saving a product with a new category also registers it. Names remain available after refresh. See [category behavior](docs/CATEGORIES.md).

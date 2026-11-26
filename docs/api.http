@@ -66,9 +66,23 @@ Content-Type: application/json
 
 {"quantity": -1, "description": "Must not be saved"}
 
-### Delete (204 with empty body)
+### List shared categories
+GET {{base}}/api/categories
+
+### Create/reuse a persistent shared category
+POST {{base}}/api/categories
+Content-Type: application/json
+
+{"name": "Smartphone"}
+
+### Assign the category to an existing product
+PATCH {{base}}/api/products/{{id}}
+Content-Type: application/json
+
+{"category": "Smartphone"}
+
+### Soft delete (204, retained row becomes hidden from all product endpoints)
 DELETE {{base}}/api/products/{{id}}
 
-### Missing product (404 after deletion)
+### Soft-deleted product (404 after deletion)
 GET {{base}}/api/products/{{id}}
-

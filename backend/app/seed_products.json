@@ -1,0 +1,242 @@
+[
+  {
+    "name": "Studio wireless headphones",
+    "description": "Over-ear headphones with active noise cancellation and 40-hour battery life.",
+    "price": "3499.00",
+    "quantity": 24,
+    "category": "Electronics",
+    "image_url": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods-max-silver/thumbnail.webp"
+  },
+  {
+    "name": "Mechanical keyboard",
+    "description": "Compact keyboard with tactile switches and a durable aluminum frame.",
+    "price": "4299.00",
+    "quantity": 12,
+    "category": "Electronics",
+    "image_url": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "Adjustable desk lamp",
+    "description": "Dimmable LED lamp with a warm reading mode.",
+    "price": "1299.00",
+    "quantity": 5,
+    "category": "Workspace",
+    "image_url": "https://cdn.dummyjson.com/product-images/home-decoration/table-lamp/thumbnail.webp"
+  },
+  {
+    "name": "Everyday canvas tote",
+    "description": "Reusable heavyweight canvas bag with an interior pocket.",
+    "price": "599.00",
+    "quantity": 48,
+    "category": "Accessories",
+    "image_url": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "Ceramic coffee mug",
+    "description": "350 ml stoneware mug with a satin glaze.",
+    "price": "449.00",
+    "quantity": 32,
+    "category": "Home & living",
+    "image_url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "A5 dotted notebook",
+    "description": "Lay-flat notebook with 160 pages of recycled paper.",
+    "price": "299.00",
+    "quantity": 3,
+    "category": "Stationery",
+    "image_url": "https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "Aluminum laptop stand",
+    "description": "Ventilated, foldable stand for laptops up to 16 inches.",
+    "price": "1899.00",
+    "quantity": 16,
+    "category": "Workspace",
+    "image_url": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "Insulated water bottle",
+    "description": "Double-wall stainless steel bottle, 750 ml.",
+    "price": "899.00",
+    "quantity": 0,
+    "category": "Accessories",
+    "image_url": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "USB-C desktop hub",
+    "description": "Six-port hub with HDMI, USB-A and power delivery.",
+    "price": "2499.00",
+    "quantity": 9,
+    "category": "Electronics",
+    "image_url": "https://images.unsplash.com/photo-1625842268584-8f3296236761?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "Felt desk mat",
+    "description": "Soft desk mat with an anti-slip backing, 80 x 40 cm.",
+    "price": "799.00",
+    "quantity": 21,
+    "category": "Workspace",
+    "image_url": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "Weekly planner",
+    "description": "Undated planner with space for notes and priorities.",
+    "price": "349.00",
+    "quantity": 7,
+    "category": "Stationery",
+    "image_url": "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "Linen cushion cover",
+    "description": "Natural linen cushion cover, 45 x 45 cm.",
+    "price": "699.00",
+    "quantity": 18,
+    "category": "Home & living",
+    "image_url": "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "name": "Amazon Echo Plus",
+    "description": "Voice-controlled speaker for music and everyday reminders.",
+    "price": "5499.00",
+    "quantity": 11,
+    "category": "Electronics",
+    "image_url": "https://cdn.dummyjson.com/product-images/mobile-accessories/amazon-echo-plus/thumbnail.webp"
+  },
+  {
+    "name": "Apple Airpods",
+    "description": "Compact wireless earphones with a charging case.",
+    "price": "9999.00",
+    "quantity": 6,
+    "category": "Electronics",
+    "image_url": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpods/thumbnail.webp"
+  },
+  {
+    "name": "Apple Airpower Wireless Charger",
+    "description": "Wireless charging pad for compatible everyday devices.",
+    "price": "2999.00",
+    "quantity": 4,
+    "category": "Electronics",
+    "image_url": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-airpower-wireless-charger/thumbnail.webp"
+  },
+  {
+    "name": "Apple HomePod Mini Cosmic Grey",
+    "description": "Compact smart speaker for a desk or living room.",
+    "price": "8499.00",
+    "quantity": 8,
+    "category": "Electronics",
+    "image_url": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-homepod-mini-cosmic-grey/thumbnail.webp"
+  },
+  {
+    "name": "Apple iPhone Charger",
+    "description": "USB power adapter for compatible charging cables.",
+    "price": "1799.00",
+    "quantity": 28,
+    "category": "Electronics",
+    "image_url": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-iphone-charger/thumbnail.webp"
+  },
+  {
+    "name": "Apple MagSafe Battery Pack",
+    "description": "Portable magnetic battery pack for compatible phones.",
+    "price": "7499.00",
+    "quantity": 0,
+    "category": "Electronics",
+    "image_url": "https://cdn.dummyjson.com/product-images/mobile-accessories/apple-magsafe-battery-pack/thumbnail.webp"
+  },
+  {
+    "name": "Beats Flex Wireless Earphones",
+    "description": "Lightweight wireless earphones for commuting and calls.",
+    "price": "4999.00",
+    "quantity": 10,
+    "category": "Electronics",
+    "image_url": "https://cdn.dummyjson.com/product-images/mobile-accessories/beats-flex-wireless-earphones/thumbnail.webp"
+  },
+  {
+    "name": "Family Tree Photo Frame",
+    "description": "Decorative photo frame for a shelf or wall.",
+    "price": "1199.00",
+    "quantity": 13,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/home-decoration/family-tree-photo-frame/thumbnail.webp"
+  },
+  {
+    "name": "House Showpiece Plant",
+    "description": "Small decorative plant for a desk or shelf.",
+    "price": "699.00",
+    "quantity": 22,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/home-decoration/house-showpiece-plant/thumbnail.webp"
+  },
+  {
+    "name": "Plant Pot",
+    "description": "Simple plant pot for indoor greenery.",
+    "price": "499.00",
+    "quantity": 5,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/home-decoration/plant-pot/thumbnail.webp"
+  },
+  {
+    "name": "Bamboo Spatula",
+    "description": "Lightweight cooking spatula with a smooth bamboo finish.",
+    "price": "249.00",
+    "quantity": 34,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/kitchen-accessories/bamboo-spatula/thumbnail.webp"
+  },
+  {
+    "name": "Chopping Board",
+    "description": "Everyday food preparation board for a kitchen counter.",
+    "price": "899.00",
+    "quantity": 16,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/kitchen-accessories/chopping-board/thumbnail.webp"
+  },
+  {
+    "name": "Citrus Squeezer Yellow",
+    "description": "Handheld citrus press for fresh juice.",
+    "price": "399.00",
+    "quantity": 3,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/kitchen-accessories/citrus-squeezer-yellow/thumbnail.webp"
+  },
+  {
+    "name": "Glass",
+    "description": "Clear drinking glass for everyday table settings.",
+    "price": "199.00",
+    "quantity": 45,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/kitchen-accessories/glass/thumbnail.webp"
+  },
+  {
+    "name": "Lunch Box",
+    "description": "Reusable lunch box for work or travel.",
+    "price": "799.00",
+    "quantity": 19,
+    "category": "Accessories",
+    "image_url": "https://cdn.dummyjson.com/product-images/kitchen-accessories/lunch-box/thumbnail.webp"
+  },
+  {
+    "name": "Spice Rack",
+    "description": "Compact rack for keeping kitchen spices organized.",
+    "price": "1499.00",
+    "quantity": 7,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/kitchen-accessories/spice-rack/thumbnail.webp"
+  },
+  {
+    "name": "Tray",
+    "description": "Serving tray for drinks and small table essentials.",
+    "price": "649.00",
+    "quantity": 14,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/kitchen-accessories/tray/thumbnail.webp"
+  },
+  {
+    "name": "Wooden Rolling Pin",
+    "description": "Smooth wooden rolling pin for everyday baking.",
+    "price": "449.00",
+    "quantity": 2,
+    "category": "Home & living",
+    "image_url": "https://cdn.dummyjson.com/product-images/kitchen-accessories/wooden-rolling-pin/thumbnail.webp"
+  }
+]

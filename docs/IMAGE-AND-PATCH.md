@@ -8,11 +8,11 @@ No upload service, S3 credentials, or image-proxy backend is needed. The backend
 
 The form previews valid links, allows removal, and retains the URL after any failed save. Saving an image removal sends `{"image_url": null}`.
 
-Migration `0002` adds the nullable column and its HTTPS check without rewriting existing product records. Run `alembic upgrade head` for new or existing databases. Do not edit a previously applied `0001` migration.
+Migration `0002` adds the nullable column and its HTTPS check without rewriting existing product records. The revised initial migration includes soft deletion. Use a clean database/schema and run `alembic upgrade head` to apply the current migration chain, including shared categories in 0003. An applied revision is not automatically replayed after its source changes.
 
 ## PUT and PATCH
 
-Both assignment-required PUT and partial-update PATCH are available at `/api/products/{id}`.
+Both full-replacement PUT and partial-update PATCH are available at `/api/products/{id}`.
 
 - PUT requires name, price and quantity; omitted optional fields are cleared.
 - PATCH accepts only changed fields; omitted fields remain unchanged.
@@ -37,7 +37,7 @@ The React edit form compares normalized original/current values and sends only a
 
 The database migration creates `ix_products_name_trgm`, a PostgreSQL GIN index using `pg_trgm` and `gin_trgm_ops`. This is appropriate for the case-insensitive substring query `name ILIKE '%term%'`; an ordinary name B-tree index is not a substitute for arbitrary substring matching.
 
-The API escapes LIKE metacharacters and binds parameters. It counts matches separately and fetches only the requested page. The composite `created_at DESC, id DESC` B-tree index supports deterministic newest-first pagination.
+Both search and ordering indexes cover only rows where is_deleted IS FALSE. The API filters every list, count, and aggregate the same way, escapes LIKE metacharacters, and binds parameters. It counts matches separately and fetches only the requested page. The composite `created_at DESC, id DESC` B-tree index supports deterministic newest-first pagination.
 
 The PostgreSQL planner decides whether to use an index. Tiny datasets, very short search strings, and broad matches may still use sequential scans. No latency benchmark is claimed.
 

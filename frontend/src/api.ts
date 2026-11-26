@@ -1,3 +1,5 @@
+export interface Category { id: number; name: string; created_at: string }
+
 export interface Product {
   id: number;
   name: string;
@@ -27,7 +29,8 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
       ...options,
       headers: { ...(options?.body ? { 'Content-Type': 'application/json' } : {}), ...options?.headers },
     });
-  } catch {
+  } catch (caught) {
+    if (options?.signal?.aborted) throw caught;
     throw new ApiError('Cannot reach the server. Check your connection and try again.', 0);
   }
   if (!response.ok) {
@@ -39,10 +42,12 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
 }
 
 export const api = {
-  list: (search: string, page: number, pageSize = 10) =>
-    request<ProductPage>('/api/products?' + new URLSearchParams({ search, page: String(page), page_size: String(pageSize) })),
-  stats: () => request<Stats>('/api/products/stats'),
-  get: (id: number) => request<Product>(`/api/products/${id}`),
+  categories: (signal?: AbortSignal) => request<Category[]>('/api/categories', { signal }),
+  createCategory: (name: string) => request<Category>('/api/categories', { method: 'POST', body: JSON.stringify({ name }) }),
+  list: (search: string, page: number, pageSize = 10, signal?: AbortSignal) =>
+    request<ProductPage>('/api/products?' + new URLSearchParams({ search, page: String(page), page_size: String(pageSize) }), { signal }),
+  stats: (signal?: AbortSignal) => request<Stats>('/api/products/stats', { signal }),
+  get: (id: number, signal?: AbortSignal) => request<Product>(`/api/products/${id}`, { signal }),
   create: (data: ProductInput) => request<Product>('/api/products', { method: 'POST', body: JSON.stringify(data) }),
   replace: (id: number, data: ProductInput) => request<Product>(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   patch: (id: number, data: ProductPatch) => request<Product>(`/api/products/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),

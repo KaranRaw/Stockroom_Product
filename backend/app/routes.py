@@ -47,6 +47,5 @@ def patch_product(product_id: ProductId, data: ProductPatch, db: DB):
 
 @router.delete("/{product_id}", status_code=204)
 def delete_product(product_id: ProductId, db: DB):
-    db.delete(services.require_product(db, product_id))
-    db.commit()
+    services.soft_delete_product(db, product_id)
     return Response(status_code=204)
